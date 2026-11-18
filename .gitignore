@@ -1,0 +1,6 @@
+node_modules/
+user.json
+scripts/history.json
+data
+# TMDb API token (keep it private)
+config.js
