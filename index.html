@@ -2,15 +2,15 @@
     <title>My Favourite Movies</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
     <style>
-        body { --primary: #E50914; --secondary: #000000; margin: 0px;}
+        body { --primary: #E50914 ; --secondary: #29b6f6; margin: 0px;}
         * {font-family: 'Roboto', sans-serif;}
-        button { 
+        button {
             -webkit-font-smoothing: antialiased;
             display: inline-block;
             text-decoration: none;
             margin: 2px;
             color: var(--primary);
-            background: rgb(250, 212, 212);
+            background: white;
             border: 1px solid var(--primary);
             height: 20px;
             font-size: 9px;
@@ -22,29 +22,22 @@
         div#main {padding: 10px;}
         input {margin-bottom: 5px; margin-top: 2px; padding: 4px; font-size: 12px; }
         h1 {background: var(--primary); color: white; font-weight: bold; text-transform: uppercase; font-size: 20px; margin: 0px; padding: 15px;}
-        h1 span.brand {float: right; font-size: 14px; font-weight: normal; text-transform: none; margin-top: 4px;}
         h2 { margin-block-start: 0px; margin-block-end: 10px; font-size: 20px;  color: var(--primary);}
         button:hover { background: var(--primary); color: white; }
         div.actions { margin-top: 10px;}
-        div.movie {display: inline-block; width: auto; padding: 10px; box-shadow: 2px 2px 7px #f3e8ff; margin: 5px;background: #f3e8ff}
+        div.movie {display: inline-block; width: auto; padding: 10px; box-shadow: 2px 2px 7px #ccc; margin: 5px;}
         div.movie div.movie-img {width: 200px; height: auto; min-height: 200px; cursor: pointer;}
         div.movie div.movie-img img {width: 100%; height: 200px; object-fit: cover;}
-        div.movie div.title {color:#E50914; text-align: center; overflow: hidden; text-overflow: ellipsis; width: 200px; white-space: nowrap; }
+        div.movie div.title {text-align: center; overflow: hidden; text-overflow: ellipsis; width: 200px; white-space: nowrap; }
         div.field {color: var(--primary); text-transform: uppercase; font-size: 12px;}
-        button:disabled { opacity: 0.5; cursor: default; background: white; color: var(--primary); }
-        input#query {width: 300px; max-width: 90%;}
-        p.message {color: #b00020; font-size: 14px;}
-        p.status {color: var(--primary); font-size: 14px; min-height: 18px;}
-        div.result-grid {display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;}
-        div.result {padding: 10px; box-shadow: 2px 2px 7px #ccc; display: flex; flex-direction: column;}
-        div.result img {width: 100%; height: auto;}
-        div.result div.title {font-weight: bold; margin-top: 5px;}
-        div.result div.date {color: #666; font-size: 12px;}
-        div.result p.overview {font-size: 12px; color: #333; flex-grow: 1;
-            display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden;}
-        ul.keyword-list {list-style: none; padding: 0; columns: 3 220px;}
-        ul.keyword-list li {padding: 4px 0; break-inside: avoid;}
-        ul.keyword-list li span.keyword {display: inline-block; min-width: 140px;}
+        /* Netflix 2.0 and 3.0 */
+        button:disabled {opacity: 0.5;}
+        p.message {color: red; font-size: 14px;}
+        p.status {color: var(--primary); font-size: 14px;}
+        div.result {display: inline-block; vertical-align: top; width: 200px; padding: 10px; box-shadow: 2px 2px 7px #ccc; margin: 5px;}
+        div.result img {width: 100%;}
+        div.result p {font-size: 12px;}
+        ul.keyword-list li {margin-bottom: 5px;}
     </style>
 
     <!-- TMDb API token is stored in a separate configuration file (see config.example.js) -->
@@ -66,18 +59,13 @@
         // NETFLIX 2.0: TMDb API
         const TMDB_API_URL = "https://api.themoviedb.org/3";
         const TMDB_IMG_URL = "https://image.tmdb.org/t/p/w500";
-        let search_results = [];   // results of the last search, used by the "Add" buttons
+        let search_results = [];   // results of the last search
 
-        // NETFLIX 3.0: custom keyword list, saved in localStorage (array of strings)
+        // NETFLIX 3.0: custom keyword list, saved in localStorage
         localStorage.my_keywords = localStorage.my_keywords || JSON.stringify([]);
 
 
         // VIEWS
-
-        // Escapes text (e.g. data received from the TMDb API) before inserting it as HTML
-        const escapeHTML = (text) => String(text ?? "")
-            .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
         const indexView = (movies) => {
             let i=0;
@@ -87,10 +75,10 @@
               view += `
                 <div class="movie">
                    <div class="movie-img">
-                        <img data-my-id="${i}" src="${escapeHTML(movies[i].thumbnail)}" onerror="this.src='files/noimage.png'"/>
+                        <img data-my-id="${i}" src="${movies[i].thumbnail}" onerror="this.src='files/noimage.png'"/>
                    </div>
                    <div class="title">
-                       ${escapeHTML(movies[i].title) || "<em>No title</em>"}
+                       ${movies[i].title || "<em>No title</em>"}
                    </div>
                    <div class="actions">
                         <!-------------------Insert here "Show" and "Delete" buttons------------------>
@@ -118,18 +106,18 @@
             return `<h2>Edit Movie </h2>
                 <div class="field">
                 Title <br>
-                <input  type="text" id="title" placeholder="Title" 
-                        value="${escapeHTML(movie.title)}">
+                <input  type="text" id="title" placeholder="Title"
+                        value="${movie.title}">
                 </div>
                 <div class="field">
                 Director <br>
-                <input  type="text" id="director" placeholder="Director" 
-                        value="${escapeHTML(movie.director)}">
+                <input  type="text" id="director" placeholder="Director"
+                        value="${movie.director}">
                 </div>
                 <div class="field">
                 Thumbnail <br>
-                <input  type="text" id="thumbnail" placeholder="Thumbnail URL" 
-                        value="${escapeHTML(movie.thumbnail)}">
+                <input  type="text" id="thumbnail" placeholder="Thumbnail URL"
+                        value="${movie.thumbnail}">
                 </div>
                 <div class="actions">
                     <button class="update" data-my-id="${i}">
@@ -146,8 +134,8 @@
             // Complete: generate HTML with movie information
             return `
              <p>
-                <strong>Title:</strong> ${escapeHTML(movie.title)} <br>
-                <strong>Director:</strong> ${escapeHTML(movie.director)}
+                <strong>Title:</strong> ${movie.title} <br>
+                <strong>Director:</strong> ${movie.director}
              </p>
              <div class="actions">
                 <button class="index">Back</button>
@@ -179,47 +167,47 @@
 
         // ----- NETFLIX 2.0: TMDb VIEWS -----
 
-        // Search form. Optional: a message (e.g. validation error) and the previous query
-        const searchView = (message = "", query = "") => {
+        // Search form. message: error or hint for the user, query: previous search term
+        const searchView = (message, query) => {
             return `<h2>Search Movies on TMDb</h2>
                 <div class="field">
                 Movie title <br>
-                <input  type="text" id="query" placeholder="e.g. Titanic"
-                        value="${escapeHTML(query)}">
+                <input  type="text" id="query" placeholder="e.g. Titanic" value="${query}">
                 </div>
-                <p class="message">${escapeHTML(message)}</p>
+                <p class="message">${message}</p>
                 <div class="actions">
                     <button class="search">Search</button>
                     <button class="index">Back</button>
                 </div>`;
         }
 
-        // Search results in a grid: poster, title, release date, synopsis and "Add" button
+        // Search results: poster, title, release date, synopsis, "Add" and "Keywords" buttons
         const resultsView = (results) => {
+            let i = 0;
             let view = `<h2>Search Results</h2>
                 <p class="status" id="status"></p>`;
 
             if (results.length === 0) {
                 view += `<p class="message">No movies were found. Please try another title.</p>`;
-            } else {
-                view += `<div class="result-grid">`;
-                results.forEach((movie, i) => {
-                    let poster = movie.poster_path
-                        ? `${TMDB_IMG_URL}${movie.poster_path}`
-                        : "files/noimage.png";
-                    view += `
-                    <div class="result">
-                        <img src="${poster}" onerror="this.src='files/noimage.png'"/>
-                        <div class="title">${escapeHTML(movie.title) || "<em>No title</em>"}</div>
-                        <div class="date">Release date: ${escapeHTML(movie.release_date) || "unknown"}</div>
-                        <p class="overview">${escapeHTML(movie.overview) || "<em>No synopsis available</em>"}</p>
-                        <div class="actions">
-                            <button class="add-from-api" data-my-id="${i}">Add</button>
-                            <button class="keywords" data-my-id="${movie.id}">Keywords</button>
-                        </div>
-                    </div>`;
-                });
-                view += `</div>`;
+            }
+
+            while (i < results.length) {
+                let poster = "files/noimage.png";
+                if (results[i].poster_path) {
+                    poster = TMDB_IMG_URL + results[i].poster_path;
+                }
+                view += `
+                <div class="result">
+                    <img src="${poster}" onerror="this.src='files/noimage.png'"/>
+                    <h3>${results[i].title}</h3>
+                    <p><strong>Release date:</strong> ${results[i].release_date || "unknown"}</p>
+                    <p>${results[i].overview || "<em>No synopsis available</em>"}</p>
+                    <div class="actions">
+                        <button class="add-from-api" data-my-id="${i}">Add</button>
+                        <button class="keywords" data-my-id="${results[i].id}">Keywords</button>
+                    </div>
+                </div>\n`;
+                i = i + 1;
             }
 
             view += `<div class="actions">
@@ -233,30 +221,28 @@
         // ----- NETFLIX 3.0: KEYWORD VIEWS -----
 
         // Keywords of the selected movie, each with an "Add to my list" button
-        // keywords: array of processed (clean, lowercase, sorted) strings
-        const keywordsView = (movieId, keywords, title = "") => {
-            const my_keywords = JSON.parse(localStorage.my_keywords);
+        // keywords: processed keywords (clean, lowercase, sorted), message: error message or ""
+        const keywordsView = (movieId, keywords, title, message) => {
+            let my_keywords = JSON.parse(localStorage.my_keywords);
+            let i = 0;
+            let view = `<h2>Keywords: ${title}</h2>
+                <p class="status" id="status"></p>
+                <p class="message">${message}</p>`;
 
-            let view = `<h2>Keywords${title ? ": " + escapeHTML(title) : ""}</h2>
-                <p class="status" id="status"></p>`;
-
-            if (keywords.length === 0) {
+            if (keywords.length === 0 && message === "") {
                 view += `<p class="message">This movie has no keywords on TMDb.</p>`;
-            } else {
-                view += `<ul class="keyword-list">`;
-                for (const keyword of keywords) {
-                    const in_list = my_keywords.includes(keyword);
-                    view += `
-                    <li>
-                        <span class="keyword">${escapeHTML(keyword)}</span>
-                        <button class="add-keyword" data-keyword="${escapeHTML(keyword)}"
-                                ${in_list ? "disabled" : ""}>
-                            ${in_list ? "In my list" : "Add to my list"}
-                        </button>
-                    </li>`;
-                }
-                view += `</ul>`;
             }
+
+            view += `<ul class="keyword-list">`;
+            while (i < keywords.length) {
+                let button = `<button class="add-keyword" data-keyword="${keywords[i]}">Add to my list</button>`;
+                if (my_keywords.includes(keywords[i])) {
+                    button = `<button class="add-keyword" disabled>In my list</button>`;
+                }
+                view += `<li>${keywords[i]} ${button}</li>\n`;
+                i = i + 1;
+            }
+            view += `</ul>`;
 
             view += `<div class="actions">
                         <button class="back-results">Back to results</button>
@@ -267,21 +253,19 @@
 
         // Custom keyword list with a "Remove" button for each keyword
         const myKeywordsView = (my_keywords) => {
+            let i = 0;
             let view = `<h2>My Keywords</h2>`;
 
             if (my_keywords.length === 0) {
                 view += `<p class="message">Your list is empty. Search a movie on TMDb and add some keywords.</p>`;
-            } else {
-                view += `<ul class="keyword-list">`;
-                my_keywords.forEach((keyword, i) => {
-                    view += `
-                    <li>
-                        <span class="keyword">${escapeHTML(keyword)}</span>
-                        <button class="remove-keyword" data-my-id="${i}">Remove</button>
-                    </li>`;
-                });
-                view += `</ul>`;
             }
+
+            view += `<ul class="keyword-list">`;
+            while (i < my_keywords.length) {
+                view += `<li>${my_keywords[i]} <button class="remove-keyword" data-my-id="${i}">Remove</button></li>\n`;
+                i = i + 1;
+            }
+            view += `</ul>`;
 
             view += `<div class="actions">
                         <button class="index">Back</button>
@@ -364,9 +348,10 @@
 
         // ----- NETFLIX 2.0: TMDb CONTROLLERS -----
 
-        // GET request to the TMDb API. Throws an Error with a clear message if something fails
+        // GET request to the TMDb API (fetch with options, as in the task description)
+        // Throws an Error with a clear message if something fails
         const tmdbGet = async (path) => {
-            if (typeof TMDB_TOKEN === "undefined" || TMDB_TOKEN === "" || TMDB_TOKEN === "YOUR_API_READ_ACCESS_TOKEN") {
+            if (TMDB_TOKEN === "YOUR_API_READ_ACCESS_TOKEN") {
                 throw new Error("No TMDb API token found. Please add your token to config.js.");
             }
 
@@ -382,39 +367,42 @@
             try {
                 response = await fetch(TMDB_API_URL + path, options);
             } catch (err) {
-                // fetch only rejects if the request could not be sent (e.g. no internet connection)
+                // fetch is rejected if the request could not be sent (e.g. no internet connection)
                 throw new Error("Could not connect to TMDb. Please check your internet connection.");
             }
 
-            if (response.status === 401) throw new Error("Invalid TMDb API token. Please check config.js.");
-            if (!response.ok)            throw new Error(`TMDb request failed (HTTP ${response.status}).`);
+            if (response.status === 401) {
+                throw new Error("Invalid TMDb API token. Please check config.js.");
+            }
+            if (response.status !== 200) {
+                throw new Error("TMDb request failed (HTTP " + response.status + ").");
+            }
 
-            return response.json();
+            return await response.json();
         };
 
-        // Shows the search form
+        // Shows the empty search form
         const searchFormContr = () => {
-            document.getElementById('main').innerHTML = searchView();
-            document.getElementById('query').focus();
+            document.getElementById('main').innerHTML = searchView("", "");
         };
 
         // Validates the query, searches TMDb and shows the results
         const searchContr = async (query) => {
-            query = (query || "").trim();
+            query = query.trim();
 
-            // Validation: not empty, max. 100 characters, only letters, numbers, spaces and common punctuation
+            // Validation: not empty and no invalid characters
             if (query === "") {
                 document.getElementById('main').innerHTML = searchView("Please enter a movie title.", query);
                 return;
             }
-            if (query.length > 100 || !/^[\p{L}\p{N}\s.,:;'!?&()\-]+$/u.test(query)) {
-                document.getElementById('main').innerHTML = searchView("The search term contains invalid characters.", query);
+            if (/[^a-zñáéíóúü0-9 .,:'!?-]/i.test(query)) {
+                document.getElementById('main').innerHTML = searchView("The search term contains invalid characters.", "");
                 return;
             }
 
             try {
-                const response = await tmdbGet('/search/movie?query=' + encodeURIComponent(query));
-                search_results = response.results || [];
+                let response = await tmdbGet('/search/movie?query=' + query);
+                search_results = response.results;
                 document.getElementById('main').innerHTML = resultsView(search_results);
             } catch (err) {
                 document.getElementById('main').innerHTML = searchView(err.message, query);
@@ -424,44 +412,53 @@
         // Adds a movie from the search results to the local database (localStorage)
         // Returns true if the movie was added, false otherwise
         const addFromAPIContr = async (movie) => {
-            const status = document.getElementById('status');
+            let status = document.getElementById('status');
 
             // Validate the data before adding
             if (!movie || !movie.title) {
-                status.textContent = "This movie has no valid data and cannot be added.";
+                status.innerHTML = "This movie has no valid data and cannot be added.";
                 return false;
             }
 
             try {
                 // The search results do not include the director, so it is requested separately
-                const credits = await tmdbGet(`/movie/${movie.id}/credits`);
-                const directors = (credits.crew || [])
-                    .filter(person => person.job === "Director")
-                    .map(person => person.name);
+                let credits = await tmdbGet('/movie/' + movie.id + '/credits');
+                let directors = [];
+                let j = 0;
+                while (j < credits.crew.length) {
+                    if (credits.crew[j].job === "Director") {
+                        directors.push(credits.crew[j].name);
+                    }
+                    j = j + 1;
+                }
 
-                const new_movie = {
+                let new_movie = {
                     title:     movie.title,
                     director:  directors.join(", ") || "Unknown",
-                    thumbnail: movie.poster_path ? TMDB_IMG_URL + movie.poster_path : "files/noimage.png"
+                    thumbnail: "files/noimage.png"
                 };
+                if (movie.poster_path) {
+                    new_movie.thumbnail = TMDB_IMG_URL + movie.poster_path;
+                }
 
                 // Avoid duplicates: same title and same director
-                const my_movies = JSON.parse(localStorage.my_movies);
-                const exists = my_movies.some(m =>
-                    (m.title || "").trim().toLowerCase()    === new_movie.title.trim().toLowerCase() &&
-                    (m.director || "").trim().toLowerCase() === new_movie.director.trim().toLowerCase()
-                );
-                if (exists) {
-                    status.textContent = `"${new_movie.title}" is already in your movies.`;
-                    return false;
+                let my_movies = JSON.parse(localStorage.my_movies);
+                let i = 0;
+                while (i < my_movies.length) {
+                    if (my_movies[i].title.toLowerCase()    === new_movie.title.toLowerCase() &&
+                        my_movies[i].director.toLowerCase() === new_movie.director.toLowerCase()) {
+                        status.innerHTML = `"${new_movie.title}" is already in your movies.`;
+                        return false;
+                    }
+                    i = i + 1;
                 }
 
                 my_movies.push(new_movie);
                 localStorage.my_movies = JSON.stringify(my_movies);
-                status.textContent = `"${new_movie.title}" was added to your movies.`;
+                status.innerHTML = `"${new_movie.title}" was added to your movies.`;
                 return true;
             } catch (err) {
-                status.textContent = err.message;
+                status.innerHTML = err.message;
                 return false;
             }
         };
@@ -480,29 +477,34 @@
         // Processes the keywords from the API: clean, lowercase, no duplicates, sorted
         // keywords: array of objects from TMDb, e.g. [{ id: 1, name: "Shipwreck" }, ...]
         const processKeywords = (keywords) => {
-            const list = [];
-            for (const keyword of keywords) {                       // iterate over all keywords
-                const clean = cleanKeyword(keyword.name || "");
-                if (clean !== "" && !list.includes(clean)) {        // skip empty words and duplicates
+            let list = [];
+            for (let keyword of keywords) {                 // iterator: goes through all keywords
+                let clean = cleanKeyword(keyword.name);
+                if (clean !== "" && !list.includes(clean)) { // skip empty words and duplicates
                     list.push(clean);
                 }
             }
-            return list.sort((a, b) => a.localeCompare(b));        // alphabetical order
+            return list.sort();                             // alphabetical order
         };
 
         // Requests the keywords of a movie from TMDb and shows them in the keywordsView
         const keywordsContr = async (movieId) => {
-            const movie = search_results.find(m => m.id === movieId);
-            const title = movie ? movie.title : "";
+            // Look for the title of the movie in the search results
+            let title = "";
+            let i = 0;
+            while (i < search_results.length) {
+                if (search_results[i].id === movieId) {
+                    title = search_results[i].title;
+                }
+                i = i + 1;
+            }
 
             try {
-                const response = await tmdbGet(`/movie/${movieId}/keywords`);
-                const keywords = processKeywords(response.keywords || []);
-                document.getElementById('main').innerHTML = keywordsView(movieId, keywords, title);
+                let response = await tmdbGet('/movie/' + movieId + '/keywords');
+                let keywords = processKeywords(response.keywords);
+                document.getElementById('main').innerHTML = keywordsView(movieId, keywords, title, "");
             } catch (err) {
-                document.getElementById('main').innerHTML = keywordsView(movieId, [], title);
-                document.getElementById('status').textContent = err.message;
-                document.querySelector('p.message').remove();   // the error replaces the "no keywords" message
+                document.getElementById('main').innerHTML = keywordsView(movieId, [], title, err.message);
             }
         };
 
@@ -513,36 +515,37 @@
 
         // Adds a keyword to the custom list in localStorage. Returns true if it was added
         const addKeywordToList = (keyword) => {
-            const status = document.getElementById('status');
-            const clean = cleanKeyword(keyword || "");               // validate again before saving
+            let status = document.getElementById('status');
+            let my_keywords = JSON.parse(localStorage.my_keywords);
 
-            if (clean === "") {
-                status.textContent = "This keyword is not valid.";
+            // Validate before saving: clean the keyword again with the regular expression
+            keyword = cleanKeyword(keyword);
+            if (keyword === "") {
+                status.innerHTML = "This keyword is not valid.";
                 return false;
             }
 
-            const my_keywords = JSON.parse(localStorage.my_keywords);
-            if (my_keywords.includes(clean)) {
-                status.textContent = `"${clean}" is already in your list.`;
+            if (my_keywords.includes(keyword)) {
+                status.innerHTML = `"${keyword}" is already in your list.`;
                 return false;
             }
 
-            my_keywords.push(clean);
+            my_keywords.push(keyword);
+            my_keywords.sort();                              // keep the list in alphabetical order
             localStorage.my_keywords = JSON.stringify(my_keywords);
-            status.textContent = `"${clean}" was added to your list.`;
+            status.innerHTML = `"${keyword}" was added to your list.`;
             return true;
         };
 
-        // Shows the custom keyword list (sorted alphabetically)
+        // Shows the custom keyword list
         const myKeywordsContr = () => {
-            const my_keywords = JSON.parse(localStorage.my_keywords).sort((a, b) => a.localeCompare(b));
-            localStorage.my_keywords = JSON.stringify(my_keywords);  // keep stored order = displayed order
+            let my_keywords = JSON.parse(localStorage.my_keywords);
             document.getElementById('main').innerHTML = myKeywordsView(my_keywords);
         };
 
         // Removes a keyword from the custom list and shows the updated list
         const removeKeywordContr = (i) => {
-            const my_keywords = JSON.parse(localStorage.my_keywords);
+            let my_keywords = JSON.parse(localStorage.my_keywords);
             my_keywords.splice(i, 1);
             localStorage.my_keywords = JSON.stringify(my_keywords);
             myKeywordsContr();
@@ -567,14 +570,14 @@
             else if (matchEvent(ev, '.open-search')) searchFormContr ();
             else if (matchEvent(ev, '.search'))      searchContr (document.getElementById('query').value);
             else if (matchEvent(ev, '.add-from-api')) {
-                const button = ev.target;
-                button.disabled = true;               // prevents pressing the button multiple times
-                button.textContent = "Adding...";
+                let button = ev.target;
+                button.disabled = true;                 // prevents pressing the button multiple times
+                button.innerHTML = "Adding...";
                 addFromAPIContr(search_results[myId(ev)]).then(added => {
                     if (added) {
-                        button.textContent = "Added";  // stays disabled: movie is already saved
+                        button.innerHTML = "Added";      // stays disabled: the movie is already saved
                     } else {
-                        button.textContent = "Add";
+                        button.innerHTML = "Add";
                         button.disabled = false;
                     }
                 });
@@ -585,31 +588,31 @@
             else if (matchEvent(ev, '.my-keywords'))    myKeywordsContr    ();
             else if (matchEvent(ev, '.remove-keyword')) removeKeywordContr (myId(ev));
             else if (matchEvent(ev, '.add-keyword')) {
-                const button = ev.target;
+                let button = ev.target;
                 if (addKeywordToList(button.dataset.keyword)) {
-                    button.textContent = "In my list";
+                    button.innerHTML = "In my list";
                     button.disabled = true;
                 }
             }
         })
 
-        // Netflix 2.0: Enter key in the search field also starts the search
+        // Netflix 2.0: the Enter key in the search field also starts the search
         document.addEventListener('keydown', ev => {
             if (ev.key === 'Enter' && matchEvent(ev, '#query')) searchContr (ev.target.value);
         })
 
-        
-        
-        // Initialization        
+
+
+        // Initialization
         document.addEventListener('DOMContentLoaded', indexContr);
     </script>
 </head>
 
 <body>
 
-    <h1>My Favourite Movies <span class="brand">My little Netflix</span></h1>
+    <h1>My Favourite Movies</h1>
     <div id="main"> <!-- The view is included here --> </div>
 
-    
+
 </body>
 </html>
